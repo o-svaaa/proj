@@ -67,7 +67,7 @@ class Validator {
     
     public static function validateLanguages($languages, $pdo) {
         if (empty($languages)) {
-            return ['valid' => false, 'message' => 'Выберите хотя бы один язык программирования.', 'allowed_chars' => 'Необходимо выбрать хотя бы один язык из списка'];
+            return ['valid' => true];
         }
         if (count($languages) > 12) {
             return ['valid' => false, 'message' => 'Выбрано слишком много языков.', 'allowed_chars' => 'Максимальное количество языков: 12'];
