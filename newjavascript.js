@@ -1,4 +1,4 @@
-// API endpoints - используем абсолютные пути
+// API endpoints
 const API_BASE = window.location.origin + '/proj/api';
 let currentUser = null;
 
@@ -77,7 +77,13 @@ function fillFormWithUserData(user) {
 
 // Сохранение данных в localStorage
 function saveFormDataToLocal() {
-    const formData = getFormData();
+    const formData = {
+        name: document.getElementById('name')?.value || '',
+        email: document.getElementById('email')?.value || '',
+        tel: document.getElementById('tel')?.value || '',
+        message: document.getElementById('message')?.value || '',
+        check: document.getElementById('check')?.checked || false
+    };
     localStorage.setItem('travelFormData', JSON.stringify(formData));
 }
 
@@ -86,29 +92,30 @@ function loadSavedFormData() {
     const saved = localStorage.getItem('travelFormData');
     if (saved) {
         const formData = JSON.parse(saved);
-        document.getElementById('name').value = formData.name || '';
-        document.getElementById('email').value = formData.email || '';
-        document.getElementById('tel').value = formData.tel || '';
-        document.getElementById('message').value = formData.message || '';
-        document.getElementById('check').checked = formData.check || false;
+        if (document.getElementById('name')) document.getElementById('name').value = formData.name || '';
+        if (document.getElementById('email')) document.getElementById('email').value = formData.email || '';
+        if (document.getElementById('tel')) document.getElementById('tel').value = formData.tel || '';
+        if (document.getElementById('message')) document.getElementById('message').value = formData.message || '';
+        if (document.getElementById('check')) document.getElementById('check').checked = formData.check || false;
     }
 }
 
-// Получение данных формы
+// Получение данных формы (АДАПТИРОВАНО под туристическую форму)
 function getFormData() {
+    // Для API нужны другие названия полей
     return {
         fullname: document.getElementById('name')?.value || '',
         email: document.getElementById('email')?.value || '',
         phone: document.getElementById('tel')?.value || '',
         biography: document.getElementById('message')?.value || '',
         contract_agreed: document.getElementById('check')?.checked || false,
-        gender: 'unspecified',
-        birthdate: '',
-        languages: []
+        gender: 'unspecified',  // значение по умолчанию
+        birthdate: '',          // в форме нет даты рождения
+        languages: []           // в форме нет выбора языков (отправляем пустой массив, но API требует хотя бы один язык)
     };
 }
 
-// Валидация формы
+// Валидация формы на клиенте (адаптирована)
 function validateForm(formData) {
     const errors = [];
     
@@ -146,7 +153,8 @@ async function submitViaAPI(formData, isUpdate = false) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            credentials: 'include'
+            credentials: 'include',
+            body: JSON.stringify(formData)
         });
         
         console.log('Response status:', response.status);
@@ -174,7 +182,12 @@ async function submitViaAPI(formData, isUpdate = false) {
             await checkAuth();
             return true;
         } else if (data.errors) {
-            showValidationErrors(data.errors);
+            // Показываем ошибки от сервера
+            const errorMessages = [];
+            for (const [field, err] of Object.entries(data.errors)) {
+                errorMessages.push(`${field}: ${err.message}`);
+            }
+            showMessage(errorMessages.join('\n'), 'error');
             return false;
         } else if (data.error === 'Unauthorized') {
             showMessage('Необходимо авторизоваться', 'warning');
@@ -267,13 +280,14 @@ function showMessage(text, type = 'info') {
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         font-weight: 500;
         text-align: center;
+        white-space: pre-line;
     `;
     div.innerHTML = text;
     document.body.appendChild(div);
     
     setTimeout(() => {
         div.remove();
-    }, 4000);
+    }, 5000);
 }
 
 // Показ логина и пароля
@@ -324,38 +338,6 @@ function showCredentials(login, password, profileUrl) {
     };
     
     document.getElementById('closeModalBtn').addEventListener('click', closeAll);
-}
-
-// Показ ошибок валидации
-function showValidationErrors(errors) {
-    let errorHtml = '<strong>Ошибки при заполнении формы:</strong><ul style="margin-top: 0.5rem; margin-left: 1rem;">';
-    for (const [field, err] of Object.entries(errors)) {
-        errorHtml += `<li><strong>${field}:</strong> ${escapeHtml(err.message)} ${err.allowed_chars || ''}</li>`;
-    }
-    errorHtml += '</ul>';
-    
-    const div = document.createElement('div');
-    div.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        z-index: 1000;
-        max-width: 90%;
-        width: 500px;
-        border-left: 4px solid #dc2626;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    `;
-    div.innerHTML = errorHtml;
-    document.body.appendChild(div);
-    
-    setTimeout(() => {
-        div.remove();
-    }, 5000);
 }
 
 // Показ формы входа
@@ -502,11 +484,11 @@ function initFormHandler() {
         await submitViaAPI(formData, isUpdate);
         
         if (!isUpdate) {
-            document.getElementById('name').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('tel').value = '';
-            document.getElementById('message').value = '';
-            document.getElementById('check').checked = false;
+            if (document.getElementById('name')) document.getElementById('name').value = '';
+            if (document.getElementById('email')) document.getElementById('email').value = '';
+            if (document.getElementById('tel')) document.getElementById('tel').value = '';
+            if (document.getElementById('message')) document.getElementById('message').value = '';
+            if (document.getElementById('check')) document.getElementById('check').checked = false;
         }
     });
     
