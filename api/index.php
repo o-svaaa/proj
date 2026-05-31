@@ -11,6 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+// Включаем отображение ошибок для отладки
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once dirname(__DIR__) . '/backend/Database.php';
 require_once dirname(__DIR__) . '/backend/Validator.php';
 require_once dirname(__DIR__) . '/backend/Auth.php';
@@ -20,7 +24,7 @@ require_once dirname(__DIR__) . '/backend/Application.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $request_uri = $_SERVER['REQUEST_URI'];
 
-// Извлекаем путь после /api/
+// Извлекаем путь после /proj/api/
 if (preg_match('#/proj/api/(.*)#', $request_uri, $matches)) {
     $path = '/' . $matches[1];
 } elseif (preg_match('#/api/(.*)#', $request_uri, $matches)) {
@@ -32,23 +36,22 @@ if (preg_match('#/proj/api/(.*)#', $request_uri, $matches)) {
 $path = rtrim($path, '/');
 $segments = explode('/', ltrim($path, '/'));
 
-// Для отладки - записываем в лог
 error_log("API Request: method=$method, path=$path, segments=" . print_r($segments, true));
 
 try {
     $db = Database::getInstance();
     $pdo = $db->getConnection();
+    
+    // Проверка подключения
+    $pdo->query("SELECT 1");
+    
     $auth = new Auth($pdo);
     $app = new Application($pdo);
     
     // GET /api/auth/check - проверка авторизации
     if ($method === 'GET' && $segments[0] === 'auth' && isset($segments[1]) && $segments[1] === 'check') {
         $user = $auth->getCurrentUser();
-        if ($user) {
-            echo json_encode(['success' => true, 'user' => $user]);
-        } else {
-            echo json_encode(['success' => false]);
-        }
+        echo json_encode(['success' => true, 'user' => $user]);
         exit;
     }
     
@@ -96,6 +99,16 @@ try {
             $input = $_POST;
         }
         
+        // Убедимся, что languages это массив
+        if (!isset($input['languages']) || !is_array($input['languages'])) {
+            $input['languages'] = [];
+        }
+        
+        // Если языки не выбраны, добавляем язык по умолчанию
+        if (empty($input['languages'])) {
+            $input['languages'] = ['PHP']; // Язык по умолчанию
+        }
+        
         $result = $app->create($input, $auth);
         echo json_encode($result);
         exit;
@@ -115,6 +128,11 @@ try {
             $input = $_POST;
         }
         
+        // Убедимся, что languages это массив
+        if (!isset($input['languages']) || !is_array($input['languages'])) {
+            $input['languages'] = [];
+        }
+        
         $result = $app->update($id, $input, $auth);
         echo json_encode($result);
         exit;
@@ -127,13 +145,22 @@ try {
         'error' => 'Endpoint not found',
         'method' => $method,
         'path' => $path,
-        'segments' => $segments,
-        'request_uri' => $request_uri
+        'segments' => $segments
     ]);
     
-} catch (Exception $e) {
-    error_log('API Error: ' . $e->getMessage());
+} catch (PDOException $e) {
+    error_log('Database error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
+    echo json_encode([
+        'success' => false, 
+        'error' => 'Database error: ' . $e->getMessage()
+    ]);
+} catch (Exception $e) {
+    error_log('General error: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'success' => false, 
+        'error' => 'Server error: ' . $e->getMessage()
+    ]);
 }
 ?>
