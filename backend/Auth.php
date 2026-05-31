@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 class Auth {
     private $pdo;
     
@@ -43,13 +41,18 @@ class Auth {
         $stmt = $this->pdo->prepare("UPDATE applications SET user_id = :user_id WHERE id = :id");
         $stmt->execute([':user_id' => $userId, ':id' => $applicationId]);
         
+        // Автоматически авторизуем пользователя
+        $_SESSION['user_id'] = $userId;
+        $_SESSION['application_id'] = $applicationId;
+        $_SESSION['user_login'] = $login;
+        
         return ['login' => $login, 'password' => $password];
     }
     
     public function login($login, $password) {
         $stmt = $this->pdo->prepare("
             SELECT u.id, u.login, u.password_hash, u.application_id,
-                   a.fullname, a.email, a.phone, a.birthdate, a.gender, a.biography
+                   a.id as app_id, a.fullname, a.email, a.phone, a.birthdate, a.gender, a.biography, a.contract_agreed
             FROM users u
             JOIN applications a ON u.application_id = a.id
             WHERE u.login = :login
@@ -61,8 +64,19 @@ class Auth {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['application_id'] = $user['application_id'];
             $_SESSION['user_login'] = $user['login'];
-            unset($user['password_hash']);
-            return $user;
+            
+            // Возвращаем данные пользователя
+            return [
+                'id' => $user['application_id'],
+                'fullname' => $user['fullname'],
+                'email' => $user['email'],
+                'phone' => $user['phone'],
+                'birthdate' => $user['birthdate'],
+                'gender' => $user['gender'],
+                'biography' => $user['biography'],
+                'contract_agreed' => $user['contract_agreed'],
+                'login' => $user['login']
+            ];
         }
         return false;
     }
