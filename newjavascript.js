@@ -40,16 +40,10 @@ function updateUIBasedOnAuth() {
     console.log('Updating UI, currentUser:', currentUser);
     
     if (currentUser) {
-        // Пользователь авторизован - показываем информацию
         updateAuthButtons(true, currentUser.login || currentUser.fullname);
-        
-        // Заполняем форму данными пользователя
         fillFormWithUserData(currentUser);
     } else {
-        // Пользователь не авторизован - показываем кнопку входа
         updateAuthButtons(false, null);
-        
-        // Загружаем сохранённые данные из localStorage
         loadSavedFormData();
     }
 }
@@ -104,7 +98,7 @@ function getFormData() {
         contract_agreed: document.getElementById('check')?.checked || false,
         gender: 'unspecified',
         birthdate: '',
-        languages: ['PHP']  // Язык по умолчанию
+        languages: ['PHP']
     };
 }
 
@@ -188,8 +182,8 @@ async function submitViaAPI(formData, isUpdate = false) {
     }
 }
 
-// Авторизация
-async function login(login, password) {
+// Функция входа
+async function doLogin(login, password) {
     console.log('Attempting login with:', login);
     
     try {
@@ -224,8 +218,8 @@ async function login(login, password) {
     }
 }
 
-// Выход
-async function logout() {
+// Функция выхода
+async function doLogout() {
     try {
         await fetch(`${API_BASE}/auth/logout`, {
             method: 'POST',
@@ -239,14 +233,12 @@ async function logout() {
     }
 }
 
-// Обновление кнопок авторизации (СОЗДАЁТ КНОПКИ, ЕСЛИ ИХ НЕТ)
+// Обновление кнопок авторизации
 function updateAuthButtons(isLoggedIn, username = '') {
     console.log('Updating auth buttons, isLoggedIn:', isLoggedIn);
     
-    // Ищем контейнер для кнопок
     let container = document.getElementById('authButtonsContainer');
     
-    // Если контейнера нет, создаём его в футере
     if (!container) {
         const footer = document.querySelector('footer .contw');
         if (footer) {
@@ -264,7 +256,6 @@ function updateAuthButtons(isLoggedIn, username = '') {
         }
     }
     
-    // Обновляем содержимое контейнера
     if (isLoggedIn) {
         container.innerHTML = `
             <span style="color: #946115; font-weight: bold; padding: 0.5rem;">👤 ${escapeHtml(username)}</span>
@@ -272,7 +263,7 @@ function updateAuthButtons(isLoggedIn, username = '') {
         `;
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', logout);
+            logoutBtn.addEventListener('click', doLogout);
         }
     } else {
         container.innerHTML = `
@@ -378,7 +369,6 @@ function showCredentials(login, password, profileUrl) {
 
 // Показ формы входа
 function showLoginForm() {
-    // Удаляем старый модал, если есть
     const oldModal = document.getElementById('loginModal');
     if (oldModal) oldModal.remove();
     const oldOverlay = document.getElementById('loginOverlay');
@@ -446,7 +436,7 @@ function showLoginForm() {
             return;
         }
         
-        const success = await login(login, password);
+        const success = await doLogin(login, password);
         if (success) {
             closeModal();
         }
@@ -489,7 +479,6 @@ function initFormHandler() {
     
     console.log('Form handler initialized');
     
-    // Удаляем старые обработчики
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
     
@@ -527,12 +516,11 @@ function initFormHandler() {
     });
 }
 
-// Инициализация при загрузке страницы
+// Инициализация
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM loaded, initializing...');
     console.log('API_BASE:', API_BASE);
     
-    // Always first для select
     const menu = document.getElementById('menu');
     const menu2 = document.getElementById('menu2');
     
@@ -554,7 +542,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
     
-    // Инициализация слайдера
     if (typeof $ !== 'undefined' && $('.cover').length) {
         $('.cover').slick({
             slidesToShow: 3,
@@ -572,10 +559,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
     
-    // Проверка авторизации
     await checkAuth();
-    
-    // Инициализация обработчика формы
     initFormHandler();
     
     console.log('Initialization complete');
