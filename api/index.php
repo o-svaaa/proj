@@ -11,10 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Включаем отображение ошибок для отладки
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 require_once dirname(__DIR__) . '/backend/Database.php';
 require_once dirname(__DIR__) . '/backend/Validator.php';
 require_once dirname(__DIR__) . '/backend/Auth.php';
@@ -36,27 +32,27 @@ if (preg_match('#/proj/api/(.*)#', $request_uri, $matches)) {
 $path = rtrim($path, '/');
 $segments = explode('/', ltrim($path, '/'));
 
-error_log("API Request: method=$method, path=$path, segments=" . print_r($segments, true));
-
 try {
     $db = Database::getInstance();
     $pdo = $db->getConnection();
-    
-    // Проверка подключения
-    $pdo->query("SELECT 1");
-    
     $auth = new Auth($pdo);
     $app = new Application($pdo);
     
     // GET /api/auth/check - проверка авторизации
     if ($method === 'GET' && $segments[0] === 'auth' && isset($segments[1]) && $segments[1] === 'check') {
+        session_start(); // Важно! Нужно запустить сессию
         $user = $auth->getCurrentUser();
-        echo json_encode(['success' => true, 'user' => $user]);
+        if ($user) {
+            echo json_encode(['success' => true, 'user' => $user]);
+        } else {
+            echo json_encode(['success' => false]);
+        }
         exit;
     }
     
     // POST /api/auth/login - авторизация
     if ($method === 'POST' && $segments[0] === 'auth' && isset($segments[1]) && $segments[1] === 'login') {
+        session_start(); // Важно! Нужно запустить сессию
         $input = json_decode(file_get_contents('php://input'), true);
         $login = $input['login'] ?? $_POST['login'] ?? '';
         $password = $input['password'] ?? $_POST['password'] ?? '';
@@ -73,6 +69,7 @@ try {
     
     // POST /api/auth/logout - выход
     if ($method === 'POST' && $segments[0] === 'auth' && isset($segments[1]) && $segments[1] === 'logout') {
+        session_start();
         $auth->logout();
         echo json_encode(['success' => true]);
         exit;
@@ -94,19 +91,18 @@ try {
     
     // POST /api/applications - создать новую анкету
     if ($method === 'POST' && $segments[0] === 'applications' && !isset($segments[1])) {
+        session_start(); // Для автоматической авторизации после регистрации
         $input = json_decode(file_get_contents('php://input'), true);
         if (!$input) {
             $input = $_POST;
         }
         
-        // Убедимся, что languages это массив
         if (!isset($input['languages']) || !is_array($input['languages'])) {
-            $input['languages'] = [];
+            $input['languages'] = ['PHP'];
         }
         
-        // Если языки не выбраны, добавляем язык по умолчанию
         if (empty($input['languages'])) {
-            $input['languages'] = ['PHP']; // Язык по умолчанию
+            $input['languages'] = ['PHP'];
         }
         
         $result = $app->create($input, $auth);
@@ -116,9 +112,10 @@ try {
     
     // PUT /api/applications/{id} - обновить анкету
     if ($method === 'PUT' && $segments[0] === 'applications' && isset($segments[1])) {
+        session_start();
         if (!$auth->isAuthenticated()) {
             http_response_code(401);
-            echo json_encode(['success' => false, 'error' => 'Unauthorized', 'login_url' => '/proj/login.html']);
+            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
             exit;
         }
         
@@ -128,9 +125,8 @@ try {
             $input = $_POST;
         }
         
-        // Убедимся, что languages это массив
         if (!isset($input['languages']) || !is_array($input['languages'])) {
-            $input['languages'] = [];
+            $input['languages'] = ['PHP'];
         }
         
         $result = $app->update($id, $input, $auth);
@@ -144,23 +140,12 @@ try {
         'success' => false, 
         'error' => 'Endpoint not found',
         'method' => $method,
-        'path' => $path,
-        'segments' => $segments
+        'path' => $path
     ]);
     
-} catch (PDOException $e) {
-    error_log('Database error: ' . $e->getMessage());
-    http_response_code(500);
-    echo json_encode([
-        'success' => false, 
-        'error' => 'Database error: ' . $e->getMessage()
-    ]);
 } catch (Exception $e) {
-    error_log('General error: ' . $e->getMessage());
+    error_log('API Error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode([
-        'success' => false, 
-        'error' => 'Server error: ' . $e->getMessage()
-    ]);
+    echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
 }
 ?>
