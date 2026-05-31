@@ -10,26 +10,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+
+require_once dirname(__DIR__) . '/backend/Database.php';
+require_once dirname(__DIR__) . '/backend/Validator.php';
+require_once dirname(__DIR__) . '/backend/Auth.php';
+require_once dirname(__DIR__) . '/backend/Application.php';
+
+// Получаем метод и путь
+$method = $_SERVER['REQUEST_METHOD'];
+$request_uri = $_SERVER['REQUEST_URI'];
+
+// Извлекаем путь после /api/
+if (preg_match('#/proj/api/(.*)#', $request_uri, $matches)) {
+    $path = '/' . $matches[1];
+} elseif (preg_match('#/api/(.*)#', $request_uri, $matches)) {
+    $path = '/' . $matches[1];
+} else {
+    $path = $_SERVER['PATH_INFO'] ?? '';
 }
 
-require_once '../backend/Database.php';
-require_once '../backend/Validator.php';
-require_once '../backend/Auth.php';
-require_once '../backend/Application.php';
-
-$method = $_SERVER['REQUEST_METHOD'];
-$path = $_SERVER['PATH_INFO'] ?? $_SERVER['REDIRECT_PATH_INFO'] ?? '';
 $path = rtrim($path, '/');
 $segments = explode('/', ltrim($path, '/'));
+
+// Для отладки - записываем в лог
+error_log("API Request: method=$method, path=$path, segments=" . print_r($segments, true));
 
 try {
     $db = Database::getInstance();
     $pdo = $db->getConnection();
     $auth = new Auth($pdo);
     $app = new Application($pdo);
+    
+    // GET /api/auth/check - проверка авторизации
+    if ($method === 'GET' && $segments[0] === 'auth' && isset($segments[1]) && $segments[1] === 'check') {
+        $user = $auth->getCurrentUser();
+        if ($user) {
+            echo json_encode(['success' => true, 'user' => $user]);
+        } else {
+            echo json_encode(['success' => false]);
+        }
+        exit;
+    }
+    
+    // POST /api/auth/login - авторизация
+    if ($method === 'POST' && $segments[0] === 'auth' && isset($segments[1]) && $segments[1] === 'login') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $login = $input['login'] ?? $_POST['login'] ?? '';
+        $password = $input['password'] ?? $_POST['password'] ?? '';
+        
+        $user = $auth->login($login, $password);
+        if ($user) {
+            echo json_encode(['success' => true, 'user' => $user]);
+        } else {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Invalid credentials']);
+        }
+        exit;
+    }
+    
+    // POST /api/auth/logout - выход
+    if ($method === 'POST' && $segments[0] === 'auth' && isset($segments[1]) && $segments[1] === 'logout') {
+        $auth->logout();
+        echo json_encode(['success' => true]);
+        exit;
+    }
     
     // GET /api/applications/{id} - получить данные анкеты
     if ($method === 'GET' && $segments[0] === 'applications' && isset($segments[1])) {
@@ -57,11 +101,11 @@ try {
         exit;
     }
     
-    // PUT /api/applications/{id} - обновить анкету (требует авторизации)
+    // PUT /api/applications/{id} - обновить анкету
     if ($method === 'PUT' && $segments[0] === 'applications' && isset($segments[1])) {
         if (!$auth->isAuthenticated()) {
             http_response_code(401);
-            echo json_encode(['success' => false, 'error' => 'Unauthorized', 'login_url' => '/8/login.html']);
+            echo json_encode(['success' => false, 'error' => 'Unauthorized', 'login_url' => '/proj/login.html']);
             exit;
         }
         
@@ -76,46 +120,20 @@ try {
         exit;
     }
     
-    // POST /api/auth/login - авторизация
-    if ($method === 'POST' && $segments[0] === 'auth' && $segments[1] === 'login') {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $login = $input['login'] ?? $_POST['login'] ?? '';
-        $password = $input['password'] ?? $_POST['password'] ?? '';
-        
-        $user = $auth->login($login, $password);
-        if ($user) {
-            echo json_encode(['success' => true, 'user' => $user]);
-        } else {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'error' => 'Invalid credentials']);
-        }
-        exit;
-    }
-    
-    // POST /api/auth/logout - выход
-    if ($method === 'POST' && $segments[0] === 'auth' && $segments[1] === 'logout') {
-        $auth->logout();
-        echo json_encode(['success' => true]);
-        exit;
-    }
-    
-    // GET /api/auth/check - проверка авторизации
-    if ($method === 'GET' && $segments[0] === 'auth' && $segments[1] === 'check') {
-        $user = $auth->getCurrentUser();
-        if ($user) {
-            echo json_encode(['success' => true, 'user' => $user]);
-        } else {
-            echo json_encode(['success' => false]);
-        }
-        exit;
-    }
-    
-    // Не найден
+    // Если ничего не подошло - 404
     http_response_code(404);
-    echo json_encode(['success' => false, 'error' => 'Endpoint not found']);
+    echo json_encode([
+        'success' => false, 
+        'error' => 'Endpoint not found',
+        'method' => $method,
+        'path' => $path,
+        'segments' => $segments,
+        'request_uri' => $request_uri
+    ]);
     
 } catch (Exception $e) {
+    error_log('API Error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Server error']);
+    echo json_encode(['success' => false, 'error' => 'Server error: ' . $e->getMessage()]);
 }
 ?>
