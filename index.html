@@ -1,0 +1,172 @@
+<html>
+    <head>
+        <title> Путешествуйте!</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <script src="js/newjavascript.js" defer></script>
+
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <header class="video-header">
+            <div class="row">
+                <div class="offset-md-2 col-md-8">
+                    <nav class="header-nav">
+                        <p class="CI"><a href="#description">путешествие это...</a></p>
+                        <p class="CI"><a href="#best">лучшие направления</a></p>
+                        <label class="CI">
+                            <select id="menu" class="mt-1" name="listAbout">
+                                <option value="a1" class="default">открывай мир по-новому </option>
+                                <option value="#ep1">Пещера светлячков, Новая Зеландия</option>
+                                <option value="#ep2">Озеро Ретба, Сенегал</option>
+                                <option value="#ep3">Пещерный город Уплисцихе, Грузия</option>
+                            </select>
+                        </label>
+                        <p class="CI"><a href="#form">Поделитесь мнением!</a></p>
+                    </nav>
+                </div>
+            </div>
+            <video autoplay muted loop playsinline poster="poster.jpg">
+                <source src="travel.mp4" type="video/mp4">
+            </video>
+
+            <div class="header-title">
+                <h1 class="DGO">Путешествия по миру</h1>
+            </div>
+        </header>
+        <nav class="mt-4 m-auto linksong nav-mob info">
+            <p class="CI"><a href="#description">почему следует путешествовать?</a></p>
+            <p class="CI"><a href="#best">лучшие направления</a></p>
+            <label class="CI mb-3">
+                <select id="menu2" class="mt-1" name="listAbout">
+                    <option value="a1" class="default">открывай мир по-новому</option>
+                    <option value="#ep1">Пещера светлячков, Новая Зеландия</option>
+                    <option value="#ep2">Озеро Ретба, Сенегал</option>
+                    <option value="#ep3">Пещерный город Уплисцихе, Грузия</option>
+                </select>
+            </label>
+            <p class="CI"><a href="#form">Поделитесь мнением!</a></p>
+        </nav>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="offset-md-2 col-md-8">
+                    <h3 id="description" class="DGO d-flex justify-content-center mt-3 mb-3">почему следует путешествовать?</h3>
+                    <div class="CI info">
+                        Путешествия — это возможность увидеть мир во всём его разнообразии, познакомиться с культурами разных стран и получить впечатления, которые остаются на всю жизнь.
+                        Каждая поездка открывает новые горизонты, вдохновляет на открытия и помогает по-новому взглянуть на привычные вещи.
+                    </div>
+                </div>
+                <h3 id="best" class="DGO d-flex justify-content-center mt-3 mb-3">лучшие направления</h3>
+                <div class="col-md">
+                    <div class="slider cover linksong linkInf">
+                        <div class="m-2">
+                            <img class="border" src="img/1.jpg" alt="">
+                            <h4>Франция</h4> <p>романтика улиц, искусство и вкус жизни</p>
+                        </div>
+                        <div class="m-2">
+                            <img class="border" src="img/2.jpg" alt="">
+                            <h4>Япония</h4> <p>традиции и будущее в одном путешествии</p>
+                        </div>
+                        <div class="m-2">
+                            <img class="border" src="img/3.jpg" alt="">
+                            <h4>Италия</h4> <p>история, еда и атмосфера уюта</p>
+                        </div>
+                        <div class="m-2">
+                            <img class="border" src="img/4.jpg" alt="">
+                            <h4>Исландия</h4> <p>природа, от которой захватывает дух</p>
+                        </div>
+                        <div class="m-2">
+                            <img class="border" src="img/5.jpg" alt="">
+                            <h4>Таиланд</h4> <p>экзотика, улыбки и теплое море</p>
+                        </div>
+                        <div class="m-2">
+                            <img class="border" src="img/6.jpg" alt="">
+                            <h4>Росиия</h4> <p>бескрайние просторы, богатая культура и контрасты</p>
+                        </div>
+                        <div class="m-2">
+                            <img class="border" src="img/7.jpg" alt="">
+                            <h4>Испания</h4> <p>солнце, музыка, море и яркий ритм жизни</p>
+                        </div>
+                        <div class="m-2">
+                            <img class="border" src="img/8.jpg" alt="">
+                            <h4>Канада</h4> <p>дикая природа, озера и современные города</p>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="mt-5 DGO d-flex justify-content-center About_content p-md-0">открывай мир по-новому</h3>
+                <div class="offset-md-7 p-0">
+                    <img src="img/mount.jpg" width="450" class="About_pic-md d-none d-md-block forPic1" alt="">
+                </div>
+                <div class="offset-md-2 col-md-5 About_content">
+                    <h4 id="ep1" class="MFMG">«Пещера светлячков, Новая Зеландия»</h4>
+                    <div class="CI info">
+                        В этой пещере живут тысячи светлячков, и потолок будто усыпан звёздами. Когда наступает темнота, кажется, что попал в волшебный космос. Можно кататься на маленьких лодках и смотреть, как светлячки отражаются в воде. Это место показывает мир с магической стороны.
+                    </div>
+                </div>
+
+                <div class="ms-4 mt-5 p-0">
+                    <img src="img/pink_water.jpg" width="445" class="About_pic-md d-none d-md-block forPic2" alt="">
+                </div>
+                <div class="offset-md-5 col-md-5 About_content tab p-md-0">
+                    <h4 id="ep2" class="MFMG">«Озеро Ретба, Сенегал»</h4>
+                    <div class="CI info">
+                        Озеро розового цвета выглядит как марсианский ландшафт. Его вода насыщена солью, и на поверхности можно плавать без усилий. Местные жители добывают соль, превращая это место в живую картину. Озеро Ретба открывает мир необычных цветов и ощущений.
+                    </div>
+                </div>
+
+                <div class="tab offset-md-2 col-md-8 About_content p-md-0">
+                    <h4 id="ep3" class="MFMG">«Пещерный город Уплисцихе, Грузия»</h4>
+                    <div class="CI info">
+                        Уплисцихе вырезан прямо в скалах и существует уже несколько тысяч лет. Внутри можно увидеть древние жилища, храмы и амфитеатр. Прогуливаясь по его туннелям, ощущаешь, будто путешествуешь во времени. Этот город открывает мир истории с необычной, мистической стороны.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="clearfix">
+            <img src="img/bue.jpg" width="200" class="ms-md-5 me-md-5 symbol" alt="">
+            <div class="ms-md-5 contw">
+                <h3 id="form" class="DGO mt-4 mt-md-0">поделитесь мнением!</h3>
+                <form class="CI form_border contw" id="comment" >
+                    <label class="mt-3 mt-md-3"><input name ="name"
+                                  id ="name"
+                                  placeholder ="Ваше имя"/>
+                    </label> <br/>
+                    <label>
+                        <input name ="tel"
+                               id ="tel"
+                               type="tel"
+                               placeholder ="Ваш телефон"/>
+                    </label> <br/>
+                    <label>
+                        <input name="email"
+                               id="email"
+                               type ="email"
+                               placeholder ="E-mail"/>
+                    </label><br/>
+                    <label>
+                        <input name ="message"
+                               id ="message"
+                               placeholder ="Ваш комментарий"/>
+                    </label> <br/>
+                    <label>
+                        <input type="checkbox"
+                               name="check"
+                               id="check"/>
+                        С политикой обработки персональных данных ознакомлен(-а)
+                    </label><br/>
+
+                    <input class="DGO button" type="submit" value="Отправить!"/>
+                </form>
+            </div>
+        </footer>
+
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="js/newjavascript.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    </body>
+</html>
