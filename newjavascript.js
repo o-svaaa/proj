@@ -1,6 +1,5 @@
 // API endpoints - используем абсолютные пути
 const API_BASE = window.location.origin + '/proj/api';
-
 let currentUser = null;
 
 // Проверка авторизации
@@ -156,7 +155,7 @@ async function submitViaAPI(formData, isUpdate = false) {
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
             const text = await response.text();
-            console.error('Non-JSON response:', text.substring(0, 200));
+            console.error('Non-JSON response:', text.substring(0, 500));
             throw new Error('Сервер вернул HTML вместо JSON. Проверьте путь к API.');
         }
         
@@ -382,6 +381,9 @@ function showLoginForm() {
         <input type="password" id="passwordInput" placeholder="Пароль" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 1rem;">
         <button id="loginBtn" style="width: 100%; padding: 0.75rem; background: #946115; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem;">Войти</button>
         <button id="closeLoginBtn" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; background: #64748b; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Отмена</button>
+        <p style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: #64748b;">
+            Нет аккаунта? <a href="#" id="registerLink" style="color: #3b82f6;">Зарегистрируйтесь</a>
+        </p>
     `;
     
     document.body.appendChild(modal);
@@ -409,6 +411,12 @@ function showLoginForm() {
         const password = document.getElementById('passwordInput').value;
         await login(login, password);
         closeModal();
+    });
+    
+    document.getElementById('registerLink')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal();
+        document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth' });
     });
 }
 
@@ -509,10 +517,43 @@ function initFormHandler() {
     });
 }
 
-// Инициализация
+// Тестовая функция для проверки API
+async function testAPI() {
+    try {
+        console.log('Testing API at:', `${API_BASE}/auth/check`);
+        const response = await fetch(`${API_BASE}/auth/check`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        console.log('API test response status:', response.status);
+        const text = await response.text();
+        console.log('API test response (first 200 chars):', text.substring(0, 200));
+        try {
+            const json = JSON.parse(text);
+            console.log('API test parsed JSON:', json);
+            return true;
+        } catch(e) {
+            console.error('Response is not valid JSON');
+            return false;
+        }
+    } catch(error) {
+        console.error('API test error:', error);
+        return false;
+    }
+}
+
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM loaded, initializing...');
     console.log('API_BASE:', API_BASE);
+    
+    // Тестируем API
+    const apiWorks = await testAPI();
+    if (!apiWorks) {
+        showMessage('⚠️ API не отвечает. Проверьте настройки сервера.', 'warning');
+    }
     
     // Always first для select
     const menu = document.getElementById('menu');
@@ -554,7 +595,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
     
+    // Проверка авторизации
     await checkAuth();
+    
+    // Инициализация обработчика формы
     initFormHandler();
     
     console.log('Initialization complete');
