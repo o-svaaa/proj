@@ -1,34 +1,41 @@
-// API endpoints
-const API_BASE = '/8/api';
-let currentUser = null;
+// API endpoints - используем абсолютные пути
+const API_BASE = window.location.origin + '/proj/api';
 
-// Функция для получения CSRF-токена
-function getCsrfToken() {
-    const token = document.querySelector('meta[name="csrf-token"]')?.content;
-    if (token) return token;
-    return document.querySelector('[name="csrf_token"]')?.value || '';
-}
+let currentUser = null;
 
 // Проверка авторизации
 async function checkAuth() {
     try {
         const response = await fetch(`${API_BASE}/auth/check`, {
-            credentials: 'same-origin',
+            method: 'GET',
+            credentials: 'include',
             headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             }
         });
+        
+        console.log('Auth check response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('Auth check data:', data);
+        
         currentUser = data.success ? data.user : null;
         updateUIBasedOnAuth();
         return currentUser;
     } catch (error) {
         console.error('Auth check error:', error);
+        currentUser = null;
+        updateUIBasedOnAuth();
         return null;
     }
 }
 
-// Обновление UI в зависимости от авторизации
+// Обновление UI
 function updateUIBasedOnAuth() {
     const authSection = document.getElementById('authSection');
     const userInfo = document.getElementById('userInfo');
@@ -41,7 +48,6 @@ function updateUIBasedOnAuth() {
         if (loginFormDiv) loginFormDiv.style.display = 'none';
         if (editSection) editSection.style.display = 'block';
         
-        // Заполняем форму данными пользователя (если есть)
         fillFormWithUserData(currentUser);
     } else {
         if (authSection) authSection.style.display = 'block';
@@ -49,11 +55,9 @@ function updateUIBasedOnAuth() {
         if (loginFormDiv) loginFormDiv.style.display = 'block';
         if (editSection) editSection.style.display = 'none';
         
-        // Восстанавливаем данные из localStorage
         loadSavedFormData();
     }
     
-    // Обновляем кнопки входа/выхода
     updateAuthButtons();
 }
 
@@ -72,7 +76,7 @@ function fillFormWithUserData(user) {
     if (checkField && user.contract_agreed) checkField.checked = true;
 }
 
-// Сохранение данных в localStorage (fallback для неавторизованных)
+// Сохранение данных в localStorage
 function saveFormDataToLocal() {
     const formData = getFormData();
     localStorage.setItem('travelFormData', JSON.stringify(formData));
@@ -91,7 +95,7 @@ function loadSavedFormData() {
     }
 }
 
-// Получение данных формы (адаптировано под туристическую форму)
+// Получение данных формы
 function getFormData() {
     return {
         fullname: document.getElementById('name')?.value || '',
@@ -99,13 +103,13 @@ function getFormData() {
         phone: document.getElementById('tel')?.value || '',
         biography: document.getElementById('message')?.value || '',
         contract_agreed: document.getElementById('check')?.checked || false,
-        gender: 'unspecified',  // значение по умолчанию
+        gender: 'unspecified',
         birthdate: '',
-        languages: []  // пустой массив, так как в форме нет выбора языков
+        languages: []
     };
 }
 
-// Валидация формы на клиенте
+// Валидация формы
 function validateForm(formData) {
     const errors = [];
     
@@ -143,26 +147,31 @@ async function submitViaAPI(formData, isUpdate = false) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            credentials: 'same-origin',
-            body: JSON.stringify(formData)
+            credentials: 'include'
         });
         
+        console.log('Response status:', response.status);
+        
+        // Проверяем, что ответ - JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text.substring(0, 200));
+            throw new Error('Сервер вернул HTML вместо JSON. Проверьте путь к API.');
+        }
+        
         const data = await response.json();
-        console.log('Response:', data);
+        console.log('Response data:', data);
         
         if (data.success) {
             if (data.login && data.password) {
-                // Новая регистрация — показываем логин и пароль
                 showCredentials(data.login, data.password, data.profile_url);
             } else if (isUpdate) {
-                // Обновление данных
                 showMessage('✅ Данные успешно обновлены!', 'success');
             } else {
                 showMessage('✅ Сообщение отправлено!', 'success');
             }
             localStorage.removeItem('travelFormData');
-            
-            // Обновляем информацию о пользователе
             await checkAuth();
             return true;
         } else if (data.errors) {
@@ -183,7 +192,7 @@ async function submitViaAPI(formData, isUpdate = false) {
     }
 }
 
-// Авторизация через API
+// Авторизация
 async function login(login, password) {
     try {
         const response = await fetch(`${API_BASE}/auth/login`, {
@@ -192,7 +201,7 @@ async function login(login, password) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            credentials: 'same-origin',
+            credentials: 'include',
             body: JSON.stringify({ login, password })
         });
         
@@ -213,12 +222,12 @@ async function login(login, password) {
     }
 }
 
-// Выход из системы
+// Выход
 async function logout() {
     try {
         await fetch(`${API_BASE}/auth/logout`, {
             method: 'POST',
-            credentials: 'same-origin'
+            credentials: 'include'
         });
         currentUser = null;
         updateUIBasedOnAuth();
@@ -268,7 +277,7 @@ function showMessage(text, type = 'info') {
     }, 4000);
 }
 
-// Показ логина и пароля пользователю
+// Показ логина и пароля
 function showCredentials(login, password, profileUrl) {
     const modal = document.createElement('div');
     modal.style.cssText = `
@@ -373,9 +382,6 @@ function showLoginForm() {
         <input type="password" id="passwordInput" placeholder="Пароль" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 1rem;">
         <button id="loginBtn" style="width: 100%; padding: 0.75rem; background: #946115; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem;">Войти</button>
         <button id="closeLoginBtn" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; background: #64748b; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Отмена</button>
-        <p style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: #64748b;">
-            Нет аккаунта? <a href="#" id="registerLink" style="color: #3b82f6;">Зарегистрируйтесь</a>
-        </p>
     `;
     
     document.body.appendChild(modal);
@@ -403,13 +409,6 @@ function showLoginForm() {
         const password = document.getElementById('passwordInput').value;
         await login(login, password);
         closeModal();
-    });
-    
-    document.getElementById('registerLink')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        closeModal();
-        // Прокручиваем к форме
-        document.getElementById('comment')?.scrollIntoView({ behavior: 'smooth' });
     });
 }
 
@@ -444,7 +443,7 @@ function updateAuthButtons() {
     }
 }
 
-// Always first для select (сохраняем оригинальную функциональность)
+// Always first для select
 function alwaysFirst(select) {
     if (!select) return;
     const firstOption = select.options[0];
@@ -485,7 +484,6 @@ function initFormHandler() {
         const formData = getFormData();
         console.log('Form data:', formData);
         
-        // Валидация
         const validationErrors = validateForm(formData);
         if (validationErrors.length > 0) {
             showMessage(validationErrors.join('\n'), 'error');
@@ -495,7 +493,6 @@ function initFormHandler() {
         const isUpdate = currentUser !== null;
         await submitViaAPI(formData, isUpdate);
         
-        // Очищаем форму только для новой регистрации
         if (!isUpdate) {
             document.getElementById('name').value = '';
             document.getElementById('email').value = '';
@@ -505,7 +502,6 @@ function initFormHandler() {
         }
     });
     
-    // Сохранение данных в localStorage при вводе (только для неавторизованных)
     newForm.addEventListener('input', function() {
         if (!currentUser) {
             saveFormDataToLocal();
@@ -513,11 +509,12 @@ function initFormHandler() {
     });
 }
 
-// Инициализация при загрузке страницы
+// Инициализация
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM loaded, initializing...');
+    console.log('API_BASE:', API_BASE);
     
-    // Always first для select (оригинальная функциональность)
+    // Always first для select
     const menu = document.getElementById('menu');
     const menu2 = document.getElementById('menu2');
     
@@ -557,10 +554,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
     
-    // Проверка авторизации
     await checkAuth();
-    
-    // Инициализация обработчика формы
     initFormHandler();
     
     console.log('Initialization complete');
