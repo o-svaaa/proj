@@ -25,7 +25,13 @@ class Application {
         $validation = Validator::validateGender($data['gender'] ?? 'unspecified');
         if (!$validation['valid']) $errors['gender'] = $validation;
         
-        $validation = Validator::validateLanguages($data['languages'] ?? [], $this->pdo);
+        // Разрешаем пустой массив языков
+        $languages = $data['languages'] ?? [];
+        if (empty($languages)) {
+            $languages = ['PHP']; // Язык по умолчанию
+        }
+        
+        $validation = Validator::validateLanguages($languages, $this->pdo);
         if (!$validation['valid']) $errors['languages'] = $validation;
         
         $validation = Validator::validateBiography($data['biography'] ?? '');
@@ -50,7 +56,7 @@ class Application {
                 ':fullname' => $data['fullname'],
                 ':phone' => $data['phone'] ?? null,
                 ':email' => $data['email'],
-                ':birthdate' => $data['birthdate'] ?? null,
+                ':birthdate' => !empty($data['birthdate']) ? $data['birthdate'] : null,
                 ':gender' => $data['gender'] ?? 'unspecified',
                 ':biography' => $data['biography'] ?? null,
                 ':contract' => ($data['contract_agreed'] ?? false) ? 1 : 0
@@ -62,7 +68,7 @@ class Application {
             $stmtLang = $this->pdo->prepare("SELECT id FROM programming_languages WHERE name = ?");
             $stmtInsert = $this->pdo->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
             
-            foreach ($data['languages'] as $langName) {
+            foreach ($languages as $langName) {
                 $stmtLang->execute([$langName]);
                 $langId = $stmtLang->fetchColumn();
                 if ($langId) {
@@ -78,25 +84,30 @@ class Application {
             return [
                 'success' => true,
                 'id' => $applicationId,
-                'profile_url' => "/8/api/applications/{$applicationId}",
+                'profile_url' => "/proj/api/applications/{$applicationId}",
                 'login' => $credentials['login'],
                 'password' => $credentials['password']
             ];
             
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            error_log('Database error in create: ' . $e->getMessage());
+            return ['success' => false, 'error' => 'Database error: ' . $e->getMessage()];
         } catch (Exception $e) {
             $this->pdo->rollBack();
-            error_log($e->getMessage());
-            return ['success' => false, 'error' => 'Database error'];
+            error_log('General error in create: ' . $e->getMessage());
+            return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
         }
     }
     
     public function update($id, $data, $auth) {
         // Проверяем, что пользователь редактирует свою анкету
-        if ($auth->getCurrentUser()['id'] != $id) {
+        $currentUser = $auth->getCurrentUser();
+        if (!$currentUser || $currentUser['id'] != $id) {
             return ['success' => false, 'error' => 'Access denied'];
         }
         
-        // Валидация (без пароля и логина)
+        // Валидация
         $errors = [];
         
         $validation = Validator::validateFullname($data['fullname'] ?? '');
@@ -114,7 +125,12 @@ class Application {
         $validation = Validator::validateGender($data['gender'] ?? 'unspecified');
         if (!$validation['valid']) $errors['gender'] = $validation;
         
-        $validation = Validator::validateLanguages($data['languages'] ?? [], $this->pdo);
+        $languages = $data['languages'] ?? [];
+        if (empty($languages)) {
+            $languages = ['PHP'];
+        }
+        
+        $validation = Validator::validateLanguages($languages, $this->pdo);
         if (!$validation['valid']) $errors['languages'] = $validation;
         
         $validation = Validator::validateBiography($data['biography'] ?? '');
@@ -142,7 +158,7 @@ class Application {
                 ':fullname' => $data['fullname'],
                 ':phone' => $data['phone'] ?? null,
                 ':email' => $data['email'],
-                ':birthdate' => $data['birthdate'] ?? null,
+                ':birthdate' => !empty($data['birthdate']) ? $data['birthdate'] : null,
                 ':gender' => $data['gender'] ?? 'unspecified',
                 ':biography' => $data['biography'] ?? null,
                 ':contract' => ($data['contract_agreed'] ?? false) ? 1 : 0,
@@ -156,7 +172,7 @@ class Application {
             $stmtLang = $this->pdo->prepare("SELECT id FROM programming_languages WHERE name = ?");
             $stmtInsert = $this->pdo->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
             
-            foreach ($data['languages'] as $langName) {
+            foreach ($languages as $langName) {
                 $stmtLang->execute([$langName]);
                 $langId = $stmtLang->fetchColumn();
                 if ($langId) {
@@ -168,10 +184,14 @@ class Application {
             
             return ['success' => true, 'id' => $id];
             
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            error_log('Database error in update: ' . $e->getMessage());
+            return ['success' => false, 'error' => 'Database error: ' . $e->getMessage()];
         } catch (Exception $e) {
             $this->pdo->rollBack();
-            error_log($e->getMessage());
-            return ['success' => false, 'error' => 'Database error'];
+            error_log('General error in update: ' . $e->getMessage());
+            return ['success' => false, 'error' => 'Error: ' . $e->getMessage()];
         }
     }
     
