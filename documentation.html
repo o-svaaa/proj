@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документация проекта | Туристический сайт + API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e0eaf4 0%, #cfdef3 100%);
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        .doc-header {
+            background: linear-gradient(135deg, #1a2a3f, #0f1a2a);
+            color: white;
+            padding: 2rem 2.5rem;
+        }
+
+        .doc-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .doc-header p {
+            opacity: 0.85;
+            font-size: 1rem;
+        }
+
+        .doc-header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+
+        .doc-nav {
+            background: #f1f5f9;
+            padding: 0.75rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .doc-nav a {
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .doc-nav a:hover {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .doc-content {
+            padding: 2rem 2.5rem;
+        }
+
+        .doc-section {
+            margin-bottom: 2.5rem;
+            scroll-margin-top: 80px;
+        }
+
+        .doc-section h2 {
+            color: #1e293b;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3b82f6;
+            display: inline-block;
+        }
+
+        .doc-section h3 {
+            color: #334155;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        .doc-section h4 {
+            color: #475569;
+            font-size: 1.1rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .file-tree {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .file-tree .folder {
+            color: #fbbf24;
+        }
+
+        .file-tree .file {
+            color: #34d399;
+        }
+
+        .file-tree .comment {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-block pre {
+            margin: 0;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .info-card.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .info-card.success {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .flow-diagram {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .badge-tech {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #1e293b;
+            margin-right: 0.5rem;
+        }
+
+        .endpoint {
+            background: #f1f5f9;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+
+        .endpoint .method {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .method-get { background: #10b981; color: white; }
+        .method-post { background: #3b82f6; color: white; }
+        .method-put { background: #f59e0b; color: white; }
+        .method-delete { background: #ef4444; color: white; }
+
+        .footer {
+            background: #f1f5f9;
+            padding: 1.5rem 2.5rem;
+            text-align: center;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .doc-content {
+                padding: 1.5rem;
+            }
+            .doc-nav {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="doc-container">
+        <div class="doc-header">
+            <h1>📚 Документация проекта</h1>
+            <p>Туристический сайт + REST API + Авторизация</p>
+            <div class="badge">Версия 2.0 | PHP 8+ | MySQL | REST API | AJAX | Сессии</div>
+        </div>
+
+        <div class="doc-nav">
+            <a href="#structure">📁 Структура</a>
+            <a href="#tech">💻 Технологии</a>
+            <a href="#routing">🔄 Маршрутизация</a>
+            <a href="#api">📡 REST API</a>
+            <a href="#auth">🔐 Авторизация</a>
+            <a href="#frontend">🎨 Frontend</a>
+            <a href="#flow">📊 Поток данных</a>
+        </div>
+
+        <div class="doc-content">
+            <!-- ==================== СТРУКТУРА ==================== -->
+            <div id="structure" class="doc-section">
+                <h2>📁 Файловая структура проекта</h2>
+                <div class="file-tree">
+                    <pre>
+<span class="folder">📁 /proj/</span>                                    <span class="comment"># Корень проекта</span>
+│
+├── <span class="file">📄 index.html</span>                           <span class="comment"># Главная страница (туристический сайт)</span>
+├── <span class="file">📄 style.css</span>                            <span class="comment"># Стили (адаптивный дизайн)</span>
+├── <span class="file">📄 newjavascript.js</span>                     <span class="comment"># Клиентская логика (AJAX, API, авторизация)</span>
+├── <span class="file">📄 documentation.html</span>                    <span class="comment"># Эта страница документации</span>
+│
+├── <span class="file">📄 .htaccess</span>                            <span class="comment"># Маршрутизация (Front Controller)</span>
+├── <span class="file">📄 fallback.php</span>                         <span class="comment"># Fallback при отключённом JavaScript</span>
+├── <span class="file">📄 login.html</span>                           <span class="comment"># Страница входа (для fallback)</span>
+│
+├── <span class="folder">📁 api/</span>                                 <span class="comment"># REST API (единая точка входа)</span>
+│   └── <span class="file">📄 index.php</span>                         <span class="comment"># Роутер + обработка запросов</span>
+│
+├── <span class="folder">📁 backend/</span>                             <span class="comment"># Бэкенд-логика (переиспользуемая)</span>
+│   ├── <span class="file">📄 Database.php</span>                     <span class="comment"># Подключение к БД (Singleton)</span>
+│   ├── <span class="file">📄 Validator.php</span>                    <span class="comment"># Валидация данных (общая для API и формы)</span>
+│   ├── <span class="file">📄 Auth.php</span>                         <span class="comment"># Авторизация (генерация логина/пароля, сессии)</span>
+│   └── <span class="file">📄 Application.php</span>                   <span class="comment"># CRUD операции с анкетами</span>
+│
+└── <span class="folder">📁 img/</span>                                  <span class="comment"># Изображения для сайта</span>
+    ├── travel.mp4
+    ├── 1.jpg ... 8.jpg
+    ├── mount.jpg
+    ├── pink_water.jpg
+    └── bue.jpg
+                    </pre>
+                </div>
+            </div>
+
+            <!-- ==================== ТЕХНОЛОГИИ ==================== -->
+            <div id="tech" class="doc-section">
+                <h2>💻 Используемые технологии</h2>
+                
+                <div class="info-card">
+                    <strong>📌 Стек технологий:</strong>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript (ES6+), jQuery, Slick Carousel, Bootstrap 5</li>
+                        <li><strong>Backend:</strong> PHP 8+ (без фреймворков, чистый PHP)</li>
+                        <li><strong>База данных:</strong> MySQL (PDO, подготовленные выражения)</li>
+                        <li><strong>API:</strong> REST (JSON)</li>
+                        <li><strong>Авторизация:</strong> PHP-сессии + HTTP Basic Auth (для админки)</li>
+                        <li><strong>Маршрутизация:</strong> Apache mod_rewrite (.htaccess)</li>
+                    </ul>
+                </div>
+
+                <h3>Frontend технологии</h3>
+                <p>
+                    - <strong>jQuery</strong> — для работы со слайдером Slick<br>
+                    - <strong>Slick Carousel</strong> — карусель с изображениями стран<br>
+                    - <strong>Bootstrap 5</strong> — сетка и адаптивность<br>
+                    - <strong>Fetch API</strong> — асинхронные запросы к REST API<br>
+                    - <strong>localStorage</strong> — сохранение данных формы при отключённом JavaScript
+                </p>
+
+                <h3>Backend технологии</h3>
+                <p>
+                    - <strong>PDO</strong> — безопасная работа с БД (защита от SQL-инъекций)<br>
+                    - <strong>password_hash() / password_verify()</strong> — хеширование паролей<br>
+                    - <strong>session_start()</strong> — механизм сессий для авторизации<br>
+                    - <strong>Singleton pattern</strong> — для подключения к БД<br>
+                    - <strong>REST API</strong> — единая точка входа, методы GET/POST/PUT
+                </p>
+            </div>
+
+            <!-- ==================== МАРШРУТИЗАЦИЯ ==================== -->
+            <div id="routing" class="doc-section">
+                <h2>🔄 Маршрутизация (Front Controller)</h2>
+                
+                <p>
+                    Маршрутизация реализована через <strong>.htaccess</strong> (Apache mod_rewrite) и единую точку входа.
+                    Все запросы к API перенаправляются в <code>api/index.php</code>, который обрабатывает маршруты.
+                </p>
+
+                <h3>.htaccess (файл маршрутизации)</h3>
+                <div class="code-block">
+                    <pre>
+RewriteEngine On
+RewriteBase /proj/
+
+# Перенаправление всех API запросов в api/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+# Если не API и не статический файл, отправляем на fallback.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ fallback.php [QSA,L]</pre>
+                </div>
+
+                <h3>Как работает маршрутизация:</h3>
+                <div class="flow-diagram">
+                    <pre>
+Запрос пользователя
+        │
+        ▼
+    .htaccess (mod_rewrite)
+        │
+        ├── /proj/api/* → api/index.php (REST API)
+        │
+        ├── /proj/*.css, *.js, *.jpg → статические файлы (прямая отдача)
+        │
+        └── все остальные запросы → fallback.php (при отключённом JS)
+                    </pre>
+                </div>
+
+                <h3>Разбор пути в api/index.php</h3>
+                <div class="code-block">
+                    <pre>
+// Извлечение пути из URL
+if (preg_match('#/proj/api/(.*)#', $request_uri, $matches)) {
+    $path = '/' . $matches[1];  // /applications/123
+}
+
+$segments = explode('/', ltrim($path, '/'));
+// $segments[0] = 'applications'
+// $segments[1] = '123'
+
+// Маршрутизация
+if ($method === 'GET' && $segments[0] === 'applications' && isset($segments[1])) {
+    // GET /api/applications/{id}
+} elseif ($method === 'POST' && $segments[0] === 'applications' && !isset($segments[1])) {
+    // POST /api/applications
+} elseif ($method === 'PUT' && $segments[0] === 'applications' && isset($segments[1])) {
+    // PUT /api/applications/{id}
+}</pre>
+                </div>
+            </div>
+
+            <!-- ==================== REST API ==================== -->
+            <div id="api" class="doc-section">
+                <h2>📡 REST API</h2>
+                
+                <p>
+                    API реализован в соответствии с принципами REST. Единая точка входа — <code>/proj/api/index.php</code>.
+                    Все данные передаются в формате JSON.
+                </p>
+
+                <h3>Доступные эндпоинты:</h3>
+
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <strong>/proj/api/applications</strong> — создание новой анкеты
+                    <div class="code-block" style="margin-top: 0.5rem;">
+                        <pre>{
+    "fullname": "Иван Петров",
+    "email": "ivan@example.com",
+    "phone": "+7 999 123-45-67",
+    "biography": "Люблю программировать",
+    "contract_agreed": true,
+    "languages": ["PHP", "JavaScript"]
+}</pre>
+                    </div>
+                    <strong>Ответ:</strong>
+                    <div class="code-block" style="margin-top: 0.5rem;">
+                        <pre>{
+    "success": true,
+    "id": 123,
+    "login": "ivanpetrov456",
+    "password": "aB4#kL9@mN",
+    "profile_url": "/proj/api/applications/123"
+}</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <span class="method method-put">PUT</span>
+                    <strong>/proj/api/applications/{id}</strong> — обновление анкеты (требует авторизации)
+                </div>
+
+                <div class="endpoint">
+                    <span class="method method-get">GET</span>
+                    <strong>/proj/api/applications/{id}</strong> — получение данных анкеты
+                </div>
+
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <strong>/proj/api/auth/login</strong> — авторизация
+                    <div class="code-block" style="margin-top: 0.5rem;">
+                        <pre>{
+    "login": "ivanpetrov456",
+    "password": "aB4#kL9@mN"
+}</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <span class="method method-get">GET</span>
+                    <strong>/proj/api/auth/check</strong> — проверка статуса авторизации
+                </div>
+
+                <div class="endpoint">
+                    <span class="method method-post">POST</span>
+                    <strong>/proj/api/auth/logout</strong> — выход из системы
+                </div>
+
+                <div class="info-card">
+                    <strong>✅ Особенности API:</strong>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>Все ответы в формате JSON</li>
+                        <li>Авторизация через сессии (credentials: 'include')</li>
+                        <li>CORS-заголовки для поддержки кросс-доменных запросов</li>
+                        <li>Валидация данных через общий класс Validator</li>
+                        <li>Защита от SQL-инъекций (PDO + подготовленные выражения)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ==================== АВТОРИЗАЦИЯ ==================== -->
+            <div id="auth" class="doc-section">
+                <h2>🔐 Авторизация</h2>
+
+                <h3>Два типа авторизации</h3>
+                <div class="comparison-table">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr><th>Характеристика</th><th>Пользовательская</th><th>Административная</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Механизм</td><td>PHP-сессии</td><td>HTTP Basic Auth</td></tr>
+                            <tr><td>Хранение</td><td>Таблица users в БД</td><td>.htpasswd файл</td></tr>
+                            <tr><td>Интерфейс</td><td>HTML-форма (модальное окно)</td><td>Всплывающее окно браузера</td></tr>
+                            <tr><td>Где используется</td><td>API, редактирование анкеты</td><td>Админ-панель (/admin/)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Генерация логина и пароля</h3>
+                <div class="code-block">
+                    <pre>
+// Генерация логина из ФИО
+function generateLogin($fullname) {
+    $cleanName = preg_replace('/[^a-zA-Zа-яА-ЯёЁ]/u', '', $fullname);
+    $cleanName = substr($cleanName, 0, 15);
+    return strtolower($cleanName) . rand(100, 999);
+}
+
+// Генерация случайного пароля
+function generatePassword($length = 10) {
+    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
+    return substr(str_shuffle($chars), 0, $length);
+}</pre>
+                </div>
+
+                <h3>Поток авторизации:</h3>
+                <div class="flow-diagram">
+                    <pre>
+1. Регистрация (отправка формы)
+       │
+       ▼
+2. Автоматическая авторизация
+       │
+       ▼
+3. Сохранение в сессию: $_SESSION['user_id'], $_SESSION['application_id']
+       │
+       ▼
+4. При следующих запросах — проверка через checkAuth()
+       │
+       ▼
+5. Выход — session_destroy()</pre>
+                </div>
+            </div>
+
+            <!-- ==================== FRONTEND ==================== -->
+            <div id="frontend" class="doc-section">
+                <h2>🎨 Frontend (JavaScript)</h2>
+
+                <h3>Основные функции newjavascript.js:</h3>
+                <ul>
+                    <li><strong>checkAuth()</strong> — проверка авторизации через API</li>
+                    <li><strong>submitViaAPI()</strong> — отправка формы через Fetch API</li>
+                    <li><strong>doLogin() / doLogout()</strong> — вход и выход из системы</li>
+                    <li><strong>showLoginForm()</strong> — модальное окно входа</li>
+                    <li><strong>showCredentials()</strong> — отображение логина/пароля после регистрации</li>
+                    <li><strong>updateAuthButtons()</strong> — динамическое обновление кнопок авторизации</li>
+                    <li><strong>alwaysFirst()</strong> — сохранение оригинальной функциональности select</li>
+                </ul>
+
+                <h3>Обработка формы (AJAX)</h3>
+                <div class="code-block">
+                    <pre>
+form.addEventListener('submit', async function(event) {
+    event.preventDefault();  // Отменяем стандартную отправку
+    
+    const formData = getFormData();
+    const isUpdate = currentUser !== null;
+    
+    await submitViaAPI(formData, isUpdate);
+});</pre>
+                </div>
+
+                <h3>Fallback (при отключённом JavaScript)</h3>
+                <p>
+                    Если в браузере пользователя отключён JavaScript, форма отправляется обычным POST-запросом на <code>fallback.php</code>,
+                    который обрабатывает данные и показывает результат. Таким образом, сайт работает в любом случае.
+                </p>
+                <div class="info-card success">
+                    <strong>✅ Progressive Enhancement:</strong> Сайт работает при включённом JS (AJAX) и при отключённом (обычная отправка формы).
+                </div>
+            </div>
+
+            <!-- ==================== ПОТОК ДАННЫХ ==================== -->
+            <div id="flow" class="doc-section">
+                <h2>📊 Поток данных</h2>
+
+                <h3>Схема работы при включённом JavaScript:</h3>
+                <div class="flow-diagram">
+                    <pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│                         ПОЛЬЗОВАТЕЛЬ                                 │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  index.html (загрузка страницы)                                     │
+│       │                                                             │
+│       ├── checkAuth() → GET /api/auth/check                        │
+│       │                                                             │
+│       └── initFormHandler() (подписка на submit)                   │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Заполнение формы → нажатие "Отправить"                             │
+│       │                                                             │
+│       ├── validateForm() (клиентская валидация)                     │
+│       │                                                             │
+│       └── submitViaAPI() → POST /api/applications                   │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  api/index.php (роутинг)                                            │
+│       │                                                             │
+│       ├── валидация (Validator.php)                                 │
+│       ├── сохранение в БД (Application.php)                         │
+│       ├── генерация логина/пароля (Auth.php)                        │
+│       └── автоматическая авторизация                                │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Ответ JSON → JavaScript                                            │
+│       │                                                             │
+│       ├── showCredentials() (показ логина/пароля)                   │
+│       └── checkAuth() → обновление UI                               │
+└─────────────────────────────────────────────────────────────────────┘</pre>
+                </div>
+
+                <h3>Схема работы при отключённом JavaScript:</h3>
+                <div class="flow-diagram">
+                    <pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│  Заполнение формы → нажатие "Отправить"                             │
+│       │                                                             │
+│       └── POST /proj/fallback.php (обычная отправка формы)         │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  fallback.php                                                        │
+│       │                                                             │
+│       ├── переиспользует те же классы (Validator, Auth, Application)│
+│       ├── сохранение в БД                                           │
+│       └── отображение результата (HTML)                             │
+└─────────────────────────────────────────────────────────────────────┘</pre>
+                </div>
+            </div>
+
+            <!-- ==================== БЕЗОПАСНОСТЬ ==================== -->
+            <div id="security" class="doc-section">
+                <h2>🛡️ Меры безопасности</h2>
+
+                <div class="comparison-table">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr><th>Уязвимость</th><th>Метод защиты</th><th>Реализация</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>SQL Injection</td><td>Подготовленные выражения</td><td>PDO + плейсхолдеры</td></tr>
+                            <tr><td>XSS</td><td>Экранирование вывода</td><td>htmlspecialchars()</td></tr>
+                            <tr><td>CSRF</td><td>CSRF-токены</td><td>bin2hex(random_bytes(32))</td></tr>
+                            <tr><td>Password</td><td>Хеширование</td><td>password_hash() / password_verify()</td></tr>
+                            <tr><td>Information Disclosure</td><td>Скрытие ошибок</td><td>display_errors = 0, error_log</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ==================== БАЗА ДАННЫХ ==================== -->
+            <div id="database" class="doc-section">
+                <h2>🗄️ Структура базы данных</h2>
+
+                <div class="code-block">
+                    <pre>
+<span class="comment">-- Таблица заявок</span>
+applications (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    fullname VARCHAR(150) NOT NULL,
+    phone VARCHAR(50) NULL,
+    email VARCHAR(100) NOT NULL,
+    birthdate DATE NULL,
+    gender ENUM('male', 'female', 'other', 'unspecified'),
+    biography TEXT NULL,
+    contract_agreed TINYINT(1) NOT NULL,
+    user_id INT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+
+<span class="comment">-- Таблица языков программирования</span>
+programming_languages (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+)
+
+<span class="comment">-- Связь many-to-many</span>
+application_languages (
+    application_id INT UNSIGNED NOT NULL,
+    language_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (application_id, language_id),
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE,
+    FOREIGN KEY (language_id) REFERENCES programming_languages(id) ON DELETE CASCADE
+)
+
+<span class="comment">-- Таблица пользователей (логины и пароли)</span>
+users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    application_id INT UNSIGNED NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+)</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📚 Документация проекта | Туристический сайт + REST API<br>
+            🔧 Архитектура: Front Controller + MVC-подобная структура | 📅 2025 год</p>
+        </div>
+    </div>
+</body>
+</html>
