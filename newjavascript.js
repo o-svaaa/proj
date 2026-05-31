@@ -1,3 +1,33 @@
+// В самом начале файла добавьте отладку
+const API_BASE = window.location.origin + '/proj/api';
+console.log('API_BASE:', API_BASE);
+
+// Добавьте тестовую функцию для проверки API
+async function testAPI() {
+    try {
+        const response = await fetch(`${API_BASE}/auth/check`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        console.log('API test response status:', response.status);
+        const text = await response.text();
+        console.log('API test response text:', text.substring(0, 200));
+        try {
+            const json = JSON.parse(text);
+            console.log('API test JSON:', json);
+        } catch(e) {
+            console.log('Response is not JSON');
+        }
+    } catch(error) {
+        console.error('API test error:', error);
+    }
+}
+
+// Вызовите тест при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    testAPI();
 // API endpoints - используем абсолютные пути
 const API_BASE = window.location.origin + '/proj/api';
 
